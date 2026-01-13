@@ -12,8 +12,10 @@ builder.Services.AddControllers();
 
 /* ================= DATABASE ================= */
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    )
+);
 
 /* ================= EMAIL SERVICE ✅ ================= */
 builder.Services.AddScoped<EmailService>();
@@ -82,7 +84,11 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
-
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 /* ================= MIDDLEWARE ================= */
 app.UseSwagger();
 app.UseSwaggerUI();
