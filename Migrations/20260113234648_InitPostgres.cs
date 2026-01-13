@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ProteinStore.API.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitPostgres : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -128,7 +128,7 @@ namespace ProteinStore.API.Migrations
                     { 43, "Fat Burner", "Thermogenic fat burner.", "/products/lipo6-black.jpg", "Nutrex Lipo-6 Black", 38m, "Thermogenic", "60 Capsules" },
                     { 44, "Pre-Workout", "High energy.", "/products/total-war.jpg", "Redcon1 Total War", 45m, "High Stim", "30 Servings" },
                     { 45, "Pre-Workout", "Alternate flavor.", "/products/total-wr.jpg", "Redcon1 Total War (Alt)", 45m, "High Stim", "30 Servings" },
-                    { 47, "Amino", "Pump support.", "/products/l-arginine.jpg", "Nutrex L-Arginine", 27m, "Nitric Oxide", "120 Capsules" },
+                    { 47, "Amino", "Pump support.", "/products/1-arginine.jpg", "Nutrex L-Arginine", 27m, "Nitric Oxide", "120 Capsules" },
                     { 48, "Fat Burner", "Body composition.", "/products/bpi-cla.jpg", "BPI Sports CLA", 28m, "CLA", "150 Softgels" },
                     { 49, "Pre-Workout", "Stim-free pump.", "/products/moons-truck-zero.jpg", "Moons Truck Zero", 42m, "Stim Free", "30 Servings" },
                     { 50, "Pre-Workout", "Energy & focus.", "/products/C4.jpg", "C4 Original Pre-Workout", 45m, "Energy & Focus", "50 Servings" },

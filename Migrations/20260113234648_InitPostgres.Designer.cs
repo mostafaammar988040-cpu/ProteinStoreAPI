@@ -12,8 +12,8 @@ using ProteinStore.API.Data;
 namespace ProteinStore.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260112210411_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260113234648_InitPostgres")]
+    partial class InitPostgres
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -389,7 +389,7 @@ namespace ProteinStore.API.Migrations
                             Id = 47,
                             Category = "Amino",
                             Description = "Pump support.",
-                            ImageUrl = "/products/l-arginine.jpg",
+                            ImageUrl = "/products/1-arginine.jpg",
                             Name = "Nutrex L-Arginine",
                             Price = 27m,
                             SubCategory = "Nitric Oxide",
