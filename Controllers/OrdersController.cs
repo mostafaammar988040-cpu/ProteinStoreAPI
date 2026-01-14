@@ -25,8 +25,12 @@ namespace ProteinStore.API.Controllers
         [HttpPost]
         public IActionResult CreateOrder(CreateOrderDto dto)
         {
+            // 🔒 VALIDATION
             if (dto.Items == null || dto.Items.Count == 0)
                 return BadRequest("Order must contain at least one item.");
+
+            if (string.IsNullOrWhiteSpace(dto.Email))
+                return BadRequest("Email is required.");
 
             var order = new Order
             {
@@ -34,7 +38,7 @@ namespace ProteinStore.API.Controllers
                 Email = dto.Email,
                 Phone = dto.Phone,
                 Address = dto.Address,
-                OrderDate = DateTime.UtcNow,
+                OrderDate = DateTime.UtcNow, // ✅ FIXED
                 OrderItems = new List<OrderItem>()
             };
 
@@ -43,41 +47,40 @@ namespace ProteinStore.API.Controllers
             foreach (var item in dto.Items)
             {
                 if (item.Quantity <= 0)
-                    return BadRequest("Invalid quantity");
+                    return BadRequest("Invalid quantity.");
 
                 var product = _context.Products.FirstOrDefault(p => p.Id == item.ProductId);
                 if (product == null)
-                    return BadRequest($"Product {item.ProductId} not found");
+                    return BadRequest($"Product {item.ProductId} not found.");
 
-                var orderItem = new OrderItem
+                order.OrderItems.Add(new OrderItem
                 {
                     ProductId = product.Id,
                     Quantity = item.Quantity,
                     Price = product.Price
-                };
+                });
 
                 total += product.Price * item.Quantity;
-                order.OrderItems.Add(orderItem);
             }
 
             order.TotalPrice = total;
-try
-{
-    _context.Orders.Add(order);
-    _context.SaveChanges();
-}
-catch (Exception ex)
-{
-    return StatusCode(500, new
-    {
-        error = ex.Message,
-        inner = ex.InnerException?.Message
-    });
-}
 
-            _context.SaveChanges();
+            // ✅ SAVE ORDER (ONCE)
+            try
+            {
+                _context.Orders.Add(order);
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    error = ex.Message,
+                    inner = ex.InnerException?.Message
+                });
+            }
 
-
+            // ✅ SEND EMAILS (NON-BLOCKING)
             try
             {
                 _emailService.SendOrderConfirmation(order.Email, order.Id, order.TotalPrice);
@@ -85,9 +88,9 @@ catch (Exception ex)
             }
             catch (Exception ex)
             {
-                Console.WriteLine("EMAIL FAILED: " + ex.ToString());
-                Console.WriteLine("Email error: " + ex.Message);
+                Console.WriteLine("EMAIL FAILED: " + ex.Message);
             }
+
             return Ok(new
             {
                 message = "Order placed successfully",
@@ -107,20 +110,6 @@ catch (Exception ex)
                 .ToList();
 
             return Ok(orders);
-        }
-
-        // 🔐 ADMIN ONLY
-        [Authorize(Roles = "Admin")]
-        [HttpPut("{id}/status")]
-        public IActionResult UpdateOrderStatus(int id, [FromBody] string status)
-        {
-            var order = _context.Orders.Find(id);
-            if (order == null) return NotFound();
-
-            order.Status = status;
-            _context.SaveChanges();
-
-            return Ok();
         }
     }
 }

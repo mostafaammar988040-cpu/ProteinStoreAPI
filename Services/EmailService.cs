@@ -14,9 +14,11 @@ namespace ProteinStore.API.Services
             _config = config;
         }
 
-        // 🔹 CORE EMAIL METHOD (used by all emails)
         private void SendEmail(string toEmail, string subject, string body, bool isHtml)
         {
+            if (string.IsNullOrWhiteSpace(toEmail))
+                throw new ArgumentException("Recipient email is empty");
+
             var settings = _config.GetSection("EmailSettings");
 
             var mail = new MailMessage
@@ -39,41 +41,33 @@ namespace ProteinStore.API.Services
                 EnableSsl = true
             };
 
-            try
-            {
-                smtp.Send(mail);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Email failed: " + ex.Message);
-            }
+            smtp.Send(mail);
         }
 
-        // 🔹 CUSTOMER ORDER CONFIRMATION EMAIL
+        // ✅ CUSTOMER EMAIL
         public void SendOrderConfirmation(string toEmail, int orderId, decimal total)
         {
             var body = $@"
 <html>
-  <body style='font-family: Arial, sans-serif; color:#020617'>
-    <h2 style='color:#2563eb'>Thank you for your order!</h2>
-    <p><strong>Order ID:</strong> {orderId}</p>
-    <p><strong>Total:</strong> ${total}</p>
-    <p><strong>Payment Method:</strong> Cash on Delivery</p>
-    <hr />
-    <p>We will contact you soon to confirm delivery.</p>
-    <p><strong>Protein Store Team 💪</strong></p>
-  </body>
+<body style='font-family:Arial'>
+  <h2>Thank you for your order!</h2>
+  <p><strong>Order ID:</strong> {orderId}</p>
+  <p><strong>Total:</strong> ${total}</p>
+  <p>Payment Method: Cash on Delivery</p>
+  <hr />
+  <p>Protein Store Team 💪</p>
+</body>
 </html>";
 
             SendEmail(
                 toEmail,
                 "Order Confirmation - Protein Store",
                 body,
-                isHtml: true
+                true
             );
         }
 
-        // 🔹 MANAGER ORDER NOTIFICATION EMAIL
+        // ✅ MANAGER EMAIL
         public void SendManagerOrderNotification(Order order)
         {
             var body = $@"
@@ -85,20 +79,13 @@ Phone: {order.Phone}
 Address: {order.Address}
 
 Total: ${order.TotalPrice}
-
-Items:
-{string.Join("\n", order.OrderItems.Select(i =>
-    $"- {i.Product.Name} x{i.Quantity}"
-))}
-
-Please prepare the order.
 ";
 
             SendEmail(
-                "ammarmostafa718@gmail.com", // 👈 manager email (can move to config later)
-                $"🧾 New Order #{order.Id}",
+                "ammarmostafa718@gmail.com",
+                $"New Order #{order.Id}",
                 body,
-                isHtml: false
+                false
             );
         }
     }
