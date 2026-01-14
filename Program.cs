@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ProteinStore.API.Data;
-using ProteinStore.API.Services; // 👈 REQUIRED
+using ProteinStore.API.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,17 +17,18 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     )
 );
 
-/* ================= EMAIL SERVICE ✅ ================= */
+/* ================= EMAIL SERVICE ================= */
 builder.Services.AddScoped<EmailService>();
 
 /* ================= CORS ================= */
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReact", policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy
+            .WithOrigins("https://proteinstore-frontend.vercel.app") // 🔒 secure
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 
@@ -84,17 +85,21 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+/* ================= AUTO MIGRATION ================= */
 if (app.Environment.IsProduction())
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
 }
+
 /* ================= MIDDLEWARE ================= */
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseCors("AllowReact");
+app.UseRouting();              // ✅ REQUIRED
+app.UseCors("AllowFrontend");  // ✅ NOW WORKS
 
 app.UseAuthentication();
 app.UseAuthorization();
