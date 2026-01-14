@@ -78,9 +78,15 @@ catch (Exception ex)
             _context.SaveChanges();
 
 
-           // _emailService.SendOrderConfirmation(order.Email, order.Id, order.TotalPrice);
-            //_emailService.SendManagerOrderNotification(order);
-
+            try
+            {
+                _emailService.SendOrderConfirmation(order.Email, order.Id, order.TotalPrice);
+                _emailService.SendManagerOrderNotification(order);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Email error: " + ex.Message);
+            }
             return Ok(new
             {
                 message = "Order placed successfully",
