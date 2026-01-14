@@ -61,14 +61,19 @@ namespace ProteinStore.API.Controllers
             }
 
             order.TotalPrice = total;
-
-            _context.Orders.Add(order);
-            _context.SaveChanges(); // generate OrderId
-
-            foreach (var item in order.OrderItems)
-            {
-                item.OrderId = order.Id;
-            }
+try
+{
+    _context.Orders.Add(order);
+    _context.SaveChanges();
+}
+catch (Exception ex)
+{
+    return StatusCode(500, new
+    {
+        error = ex.Message,
+        inner = ex.InnerException?.Message
+    });
+}
 
             _context.SaveChanges();
 
