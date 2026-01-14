@@ -78,8 +78,8 @@ catch (Exception ex)
             _context.SaveChanges();
 
 
-            _emailService.SendOrderConfirmation(order.Email, order.Id, order.TotalPrice);
-            _emailService.SendManagerOrderNotification(order);
+           // _emailService.SendOrderConfirmation(order.Email, order.Id, order.TotalPrice);
+            //_emailService.SendManagerOrderNotification(order);
 
             return Ok(new
             {
