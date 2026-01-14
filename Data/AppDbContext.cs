@@ -15,6 +15,11 @@ namespace ProteinStore.API.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<OrderItem>()
+    .HasOne(oi => oi.Order)
+    .WithMany(o => o.OrderItems)
+    .HasForeignKey(oi => oi.OrderId)
+    .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Product>().HasData(
 

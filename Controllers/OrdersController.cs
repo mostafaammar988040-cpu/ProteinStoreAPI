@@ -63,7 +63,15 @@ namespace ProteinStore.API.Controllers
             order.TotalPrice = total;
 
             _context.Orders.Add(order);
+            _context.SaveChanges(); // generate OrderId
+
+            foreach (var item in order.OrderItems)
+            {
+                item.OrderId = order.Id;
+            }
+
             _context.SaveChanges();
+
 
             _emailService.SendOrderConfirmation(order.Email, order.Id, order.TotalPrice);
             _emailService.SendManagerOrderNotification(order);
