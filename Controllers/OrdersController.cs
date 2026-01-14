@@ -85,6 +85,7 @@ catch (Exception ex)
             }
             catch (Exception ex)
             {
+                Console.WriteLine("EMAIL FAILED: " + ex.ToString());
                 Console.WriteLine("Email error: " + ex.Message);
             }
             return Ok(new
