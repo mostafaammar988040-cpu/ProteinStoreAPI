@@ -17,13 +17,29 @@ namespace ProteinStore.API.Services
         private void SendEmail(string toEmail, string subject, string body, bool isHtml)
         {
             if (string.IsNullOrWhiteSpace(toEmail))
-                throw new ArgumentException("Recipient email is empty");
+            {
+                Console.WriteLine("❌ Email failed: TO email is empty");
+                return;
+            }
 
-            var settings = _config.GetSection("EmailSettings");
+            var from = _config["EmailSettings:From"];
+            var smtpServer = _config["EmailSettings:SmtpServer"];
+            var port = _config["EmailSettings:Port"];
+            var username = _config["EmailSettings:Username"];
+            var password = _config["EmailSettings:Password"];
+
+            if (string.IsNullOrWhiteSpace(from) ||
+                string.IsNullOrWhiteSpace(smtpServer) ||
+                string.IsNullOrWhiteSpace(username) ||
+                string.IsNullOrWhiteSpace(password))
+            {
+                Console.WriteLine("❌ Email config missing. Check Render ENV variables.");
+                return;
+            }
 
             var mail = new MailMessage
             {
-                From = new MailAddress(settings["From"], "Protein Store"),
+                From = new MailAddress(from, "Protein Store"),
                 Subject = subject,
                 Body = body,
                 IsBodyHtml = isHtml
@@ -31,33 +47,26 @@ namespace ProteinStore.API.Services
 
             mail.To.Add(toEmail);
 
-            var smtp = new SmtpClient(settings["SmtpServer"])
+            var smtp = new SmtpClient(smtpServer)
             {
-                Port = int.Parse(settings["Port"]),
-                Credentials = new NetworkCredential(
-                    settings["Username"],
-                    settings["Password"]
-                ),
+                Port = int.Parse(port),
+                Credentials = new NetworkCredential(username, password),
                 EnableSsl = true
             };
 
             smtp.Send(mail);
+
+            Console.WriteLine($"✅ Email sent to {toEmail}");
         }
 
-        // ✅ CUSTOMER EMAIL
         public void SendOrderConfirmation(string toEmail, int orderId, decimal total)
         {
             var body = $@"
-<html>
-<body style='font-family:Arial'>
-  <h2>Thank you for your order!</h2>
-  <p><strong>Order ID:</strong> {orderId}</p>
-  <p><strong>Total:</strong> ${total}</p>
-  <p>Payment Method: Cash on Delivery</p>
-  <hr />
-  <p>Protein Store Team 💪</p>
-</body>
-</html>";
+<h2>Thank you for your order 💪</h2>
+<p><strong>Order ID:</strong> {orderId}</p>
+<p><strong>Total:</strong> ${total}</p>
+<p>Payment Method: Cash on Delivery</p>
+<p>Protein Store Team</p>";
 
             SendEmail(
                 toEmail,
@@ -67,9 +76,10 @@ namespace ProteinStore.API.Services
             );
         }
 
-        // ✅ MANAGER EMAIL
         public void SendManagerOrderNotification(Order order)
         {
+            var managerEmail = _config["EmailSettings:ManagerEmail"];
+
             var body = $@"
 New order received!
 
@@ -82,7 +92,7 @@ Total: ${order.TotalPrice}
 ";
 
             SendEmail(
-                "ammarmostafa718@gmail.com",
+                managerEmail,
                 $"New Order #{order.Id}",
                 body,
                 false
