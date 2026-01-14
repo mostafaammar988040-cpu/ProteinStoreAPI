@@ -34,7 +34,7 @@ namespace ProteinStore.API.Controllers
                 Email = dto.Email,
                 Phone = dto.Phone,
                 Address = dto.Address,
-                OrderDate = DateTime.Now,
+                OrderDate = DateTime.UtcNow,
                 OrderItems = new List<OrderItem>()
             };
 
