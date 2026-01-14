@@ -15,12 +15,27 @@ namespace ProteinStore.API.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<OrderItem>()
-    .HasOne(oi => oi.Order)
-    .WithMany(o => o.OrderItems)
-    .HasForeignKey(oi => oi.OrderId)
-    .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Order>()
+     .HasMany(o => o.OrderItems)
+     .WithOne(oi => oi.Order)
+     .HasForeignKey(oi => oi.OrderId)
+     .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<OrderItem>()
+                .HasOne(oi => oi.Product)
+                .WithMany()
+                .HasForeignKey(oi => oi.ProductId);
+            modelBuilder.Entity<Product>()
+    .Property(p => p.Price)
+    .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Order>()
+                .Property(o => o.TotalPrice)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<OrderItem>()
+                .Property(oi => oi.Price)
+                .HasPrecision(18, 2);
             modelBuilder.Entity<Product>().HasData(
 
             // ===================== PROTEIN =====================
